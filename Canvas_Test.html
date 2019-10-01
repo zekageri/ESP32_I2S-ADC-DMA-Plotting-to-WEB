@@ -3,52 +3,79 @@
 <head>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>      
 <script type = "text/javascript" >
+  /** new chart  **/
+var yVal , xVal = 0;
+var updateCount = 0;
+var dataPoints = [];
+var chart;
 window.onload = function () {
-	var dataPoints = [];
-	var chart = new CanvasJS.Chart("chartContainer", {
-			title : {
-				text : "Dynamic Data"
-			},
-			data : [{
-					type : "line",
-					dataPoints : dataPoints
-				}
-			]
-		});
-	chart.render();
-    var yVal , xVal = 0;
-    var updateCount = 0;
-	var updateChart = function () {
-        updateCount++;
-        dataPoints.push({
-        y : yVal,
-        x : xVal
-    });
-    if (dataPoints.length >  500 )
-      	{
-            dataPoints.shift();
-        }     
-    chart.options.title.text = "Update " + updateCount;
-    chart.render();   
+chart = new CanvasJS.Chart("chartContainer", {
+	zoomEnabled: true,
+     	rangeChanging: customInterval,
+		title : {
+			text : "Osc_Test"
+		},
+		data : [{
+				type : "line",
+				dataPoints : dataPoints
+			}
+		],
+		
+	});
+chart.render();
+}	
+
+var updateChart = function () {
+	updateCount++;
+	dataPoints.push({
+	y : yVal,
+	x : xVal--
+});
+if (dataPoints.length >  500 )
+	  {
+		dataPoints.shift();
+	}    
+chart.options.title.text = "Update " + updateCount;
+chart.render();   
 };
 
 webSocket1 = new WebSocket('ws://' + window.location.hostname + ':81/');
 webSocket1.onmessage=function(a){
 var t = a.data;
 if(t.indexOf('}')>-1){
-    var l = t.substring(0,t.length-1);
-    yVal = parseInt(l,10);
-    console.log(yVal);
-    xVal++;
-    updateChart();
+			var l = t.substring(0,t.length-1);
+    		yVal = parseInt(l,10);
+    		updateChart();
 	   }
 	};
-
-}	
 </script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.js"></script>
 </head>
+<style>
+.button {
+  background-color: #818a8a;
+  color: #FFFFFF;
+  float: right;
+  padding: 10px;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+
+#mydiv {
+    position:fixed;
+    top: 40%;
+    left: 30%;
+    margin-top: -9em; /*set to a negative number 1/2 of your height*/
+    margin-left: -15em; /*set to a negative number 1/2 of your width*/
+}
+
+</style>
 <body>
+    <div style = "height: 400px; width: 70%;"id="mydiv">
 <div id = "chartContainer" style = "height: 400px; width: 70%;"></div>
+<div class="button" width="60" height="100"><a href="MeresStop">STOP PLOTTING</a></div>
+<div class="button" width="60" height="100"><a href="MeresOk">START PLOTTING</a></div>
+</div>
 </body>
 </html>
